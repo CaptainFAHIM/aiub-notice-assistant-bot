@@ -1,0 +1,9 @@
+{
+    "prefix": "/",
+    "emoji": {
+      "success": "☑️",
+      "error": "❌",
+      "notice": "🕊️"
+    }
+  }
+  
