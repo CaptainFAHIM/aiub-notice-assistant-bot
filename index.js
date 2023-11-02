@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const connectDb = require("./config/connectDb");
 const GuildModel = require("./models/guildModel");
 const scrapeData = require("./scraper");
+const Discord = require("discord.js");
 const { Client, GatewayIntentBits } = require("discord.js");
 
 // Database connection
@@ -26,16 +27,21 @@ client.on("messageCreate", async (message) => {
         const alreadyExist = await GuildModel.findOne({ guildId });
         if (alreadyExist) {
           alreadyExist.channelId = channelId;
-          await alreadyExist.save()
-          message.reply(`${utils.emoji.success} | Successfully updated the channel!`);
+          await alreadyExist.save();
+          await message.reply(`${utils.emoji.success} | Successfully updated the channel!`);
         } else {
           const newGuild = new GuildModel({ guildId, channelId });
           await newGuild.save();
-          message.reply(`${utils.emoji.success} | Successfully added the channel!`);
+          await message.reply(`${utils.emoji.success} | Successfully added the channel!`);
         }
 
       } catch (error) {
-        message.reply(`${utils.emoji.error} | ${error.message}!`);
+        try {
+          await message.reply(`${utils.emoji.error} | ${error.message}!`);
+        } catch (error) {
+          console.log(error.message);
+        }
+
       }
     }
   }
@@ -46,7 +52,7 @@ client.on("ready", (client) => {
   setInterval(async () => {
     let flag = 0;
     let guilds = client.guilds.cache.map(guild => guild.id);
-    let guildDb = await GuildModel.find({});//guildDb[0].guildId
+    let guildDb = await GuildModel.find({});
     for (let i = 0; i < guildDb.length; i++) {
       for (let j = 0; j < guilds.length; j++) {
         if (guildDb[i].guildId === guilds[j]) {
@@ -66,13 +72,25 @@ client.on("ready", (client) => {
 
     scrapeData().then(async (data) => {
       if (data) {
-        let sendChannels = await GuildModel.find({}); //sendChannels[0].channelId
-        for(let i = 0; i<sendChannels.length; i++){
-          client.channels.cache.get(sendChannels[i].channelId).send(data.currentNotice.head);
+        try {
+          let sendChannels = await GuildModel.find({});
+          for (let i = 0; i < sendChannels.length; i++) {
+            await client.channels.cache.get(sendChannels[i].channelId).send({
+              embeds: [
+                new Discord.EmbedBuilder()
+                  .setTitle(`${utils.emoji.notice} | ${data.currentNotice.head}`)
+                  .setDescription(`Details - ${data.currentNotice.more}`)
+                  .setColor('#B2DDF2')
+              ]
+            });
+          }
+        } catch (error) {
+          console.log(error.message);
         }
+
       }
     })
-  }, 5000);
+  }, 600000);
 
 });
 
