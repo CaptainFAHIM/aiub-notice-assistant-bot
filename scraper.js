@@ -2,10 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 
 const url = "https://www.aiub.edu";
-    let allNotices = [];
-    let currentNotice;
-    let newNotiece = false;
-
+let previousNotices = [];
 
 const scrapeData = async () => {
 
@@ -14,25 +11,20 @@ const scrapeData = async () => {
         const html = response.data;
         const $ = cheerio.load(html);
         const elements = $('.card-block a');
-
+        let newNotices = [];
         for (let i = 0; i < elements.length; i++) {
             const more = $(elements[i]).attr('href');
             const head = $(elements[i]).find('h5').text();
-            allNotices.push({ head, more: `https://www.aiub.edu${more}` });
+            newNotices.push({ head, more: `https://www.aiub.edu${more}` });
         }
-        if (currentNotice !== allNotices[0]) {
-            newNotiece = true;
-            currentNotice = allNotices[0];
-        }
-        if(newNotiece === true){            //Test
-            const noticeObj = { allNotices, currentNotice };
-            newNotiece = false;
-            return noticeObj;
+        const hasChanged = JSON.stringify(newNotices) !== JSON.stringify(previousNotices);
+        if(hasChanged){
+            previousNotices = newNotices;
+            return newNotices;
         }
 
     } catch (error) {
         console.error('Error fetching the page:', error.message);
-        throw error;
     }
 };
 

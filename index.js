@@ -78,8 +78,8 @@ client.on("ready", (client) => {
             await client.channels.cache.get(sendChannels[i].channelId).send({
               embeds: [
                 new Discord.EmbedBuilder()
-                  .setTitle(`${utils.emoji.notice} | ${data.currentNotice.head}`)
-                  .setDescription(`Details - ${data.currentNotice.more}`)
+                  .setTitle(`${utils.emoji.notice} | ${data[0].head}`)
+                  .setDescription(`Details - ${data[0].more}`)
                   .setColor('#B2DDF2')
               ]
             });
@@ -90,7 +90,7 @@ client.on("ready", (client) => {
 
       }
     })
-  }, 600000);
+  }, 60000);
 
 });
 
