@@ -8,6 +8,10 @@ const scrapeData = async () => {
 
     try {
         const response = await axios.get(url);
+        if (response.status !== 200) {
+            console.error(`Failed to fetch the page. Status code: ${response.status}`);
+            return;
+        }
         const html = response.data;
         const $ = cheerio.load(html);
         const elements = $('.card-block a');
